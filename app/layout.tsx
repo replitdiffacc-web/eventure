@@ -23,7 +23,6 @@ export default function RootLayout({
         <AuthProvider>
           <Suspense fallback={null}>{children}</Suspense>
         </AuthProvider>
-        <Analytics />
         <footer className="bg-gray-50 dark:bg-gray-900 border-t py-4">
           <div className="container mx-auto px-4 text-center">
             <p className="text-sm text-muted-foreground">
