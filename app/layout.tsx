@@ -4,12 +4,12 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Suspense } from "react"
 import { AuthProvider } from "@/contexts/auth-context"
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Eventure - Activity Management System",
   description: "Centralized hub for school CCAs, committees, and events",
-  generator: "v0.app",
 }
 
 export default function RootLayout({
@@ -23,6 +23,10 @@ export default function RootLayout({
         <AuthProvider>
           <Suspense fallback={null}>{children}</Suspense>
         </AuthProvider>
+
+        {/* Toast portal for useToast */}
+        <Toaster />
+
         <footer className="bg-gray-50 dark:bg-gray-900 border-t py-4">
           <div className="container mx-auto px-4 text-center">
             <p className="text-sm text-muted-foreground">
