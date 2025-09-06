@@ -124,6 +124,7 @@
   }
 }
 
+/* Sonner variant overrides (optional if you use classNames above) */
 [data-sonner-toast][data-type="success"] {
   background-color: #5cb85c !important;
 }
@@ -131,4 +132,8 @@
   background-color: #ff0000 !important;
   color: #fff !important;
 }
-
+/* ensure inner text stays white */
+[data-sonner-toast] [data-title],
+[data-sonner-toast] [data-description] {
+  color: #fff !important;
+}
