@@ -24,7 +24,7 @@ export default function RootLayout({
           <Suspense fallback={null}>{children}</Suspense>
         </AuthProvider>
 
-        {/* Global UI (Sonner toaster) */}
+        {/* Global Sonner toaster */}
         <UIProviders />
 
         <footer className="bg-gray-50 dark:bg-gray-900 border-t py-4">
