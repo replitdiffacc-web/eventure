@@ -123,3 +123,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-sonner-toast][data-type="success"] {
+  background-color: #5cb85c !important;
+}
+[data-sonner-toast][data-type="error"] {
+  background-color: #ff0000 !important;
+  color: #fff !important;
+}
+
