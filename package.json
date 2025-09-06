@@ -1,11 +1,10 @@
 {
-  "name": "my-v0-project",
+  "name": "eventure",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "start": "next start -p $PORT",
-    "start:standalone": "node .next/standalone/server.js",
     "dev": "next dev",
     "dev:hot": "concurrently -s last -n \"NEXT,WARM\" -c \"cyan,magenta\" \"next dev\" \"node scripts/warmup-dev.mjs\"",
     "warm": "node scripts/warmup-dev.mjs",
