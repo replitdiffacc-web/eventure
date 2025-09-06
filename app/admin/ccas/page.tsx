@@ -14,7 +14,7 @@ import Navigation from "@/components/navigation"
 import { supabase } from "@/lib/supabase"
 import { Pencil, Save, X, Loader2, Lock, Mail } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { toast } from "sonner" // ✅ Sonner
+import { toast } from "sonner"
 
 interface CCA {
   id: string
@@ -41,34 +41,22 @@ export default function AdminCCAsPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (user?.role !== "admin" && user?.role !== "cca_head") {
-      return
-    }
+    if (user?.role !== "admin" && user?.role !== "cca_head") return
     fetchCCAs()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   async function fetchCCAs() {
     try {
-      console.log("[v0] User role:", user?.role)
-      console.log("[v0] User CCA name:", user?.ccaName)
-
       let query = supabase.from("activities").select("*")
-
       if (user?.role === "cca_head" && user?.ccaName) {
-        console.log("[v0] Filtering CCAs for cca_head, looking for name:", user.ccaName)
         query = query.eq("name", user.ccaName)
-      } else {
-        console.log("[v0] Not filtering - user is admin or no cca_name")
       }
-
       const { data, error } = await query
-      console.log("[v0] Fetched CCAs:", data?.length, "CCAs")
-
       if (error) {
         console.error("Error fetching CCAs:", error)
         return
       }
-
       setCcas(data || [])
     } catch (error) {
       console.error("Error:", error)
@@ -80,19 +68,14 @@ export default function AdminCCAsPage() {
   async function updateCCA(id: string, updates: Partial<CCA>) {
     setSaving(true)
     try {
-      // sanitize year_groups on save
       const payload: Partial<CCA> = {
         ...updates,
-        ...(updates.year_groups
-          ? { year_groups: formatYearGroups(updates.year_groups) }
-          : {}),
+        ...(updates.year_groups ? { year_groups: formatYearGroups(updates.year_groups) } : {}),
       }
 
       const response = await fetch(`/api/ccas/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
 
@@ -100,8 +83,9 @@ export default function AdminCCAsPage() {
 
       if (!response.ok) {
         console.error("Error updating CCA:", result.error)
-        toast("Save failed", {
+        toast.error("Save failed", {
           description: result.error || "Please try again.",
+          style: { backgroundColor: "#FF0000", color: "#FFF" },
         })
         return
       }
@@ -109,13 +93,15 @@ export default function AdminCCAsPage() {
       setCcas(ccas.map((cca) => (cca.id === id ? { ...cca, ...result.data } : cca)))
       setEditingId(null)
       setEditForm({})
-      toast("Changes saved successfully!", {
+      toast.success("Changes saved successfully!", {
         description: "Your updates have been applied.",
+        style: { backgroundColor: "#5CB85C", color: "#FFF" },
       })
     } catch (error) {
       console.error("Error:", error)
-      toast("Save failed", {
+      toast.error("Save failed", {
         description: "Failed to save changes. Please try again.",
+        style: { backgroundColor: "#FF0000", color: "#FFF" },
       })
     } finally {
       setSaving(false)
@@ -133,36 +119,24 @@ export default function AdminCCAsPage() {
   }
 
   function formatYearGroups(input: string): string {
-    // Remove all spaces and split by comma
     const groups = input.replace(/\s/g, "").split(",")
-
-    // Filter out empty strings and validate numbers
-    const validGroups = groups
-      .filter((group) => group.trim() !== "")
-      .map((group) => {
-        const num = Number.parseInt(group.trim(), 10)
-        // Valid year groups are 7-13
-        if (num >= 7 && num <= 13) {
-          return num.toString()
-        }
-        return null
+    const valid = groups
+      .filter((g) => g.trim() !== "")
+      .map((g) => {
+        const n = Number.parseInt(g.trim(), 10)
+        return n >= 7 && n <= 13 ? n.toString() : null
       })
-      .filter((group): group is string => group !== null)
-
-    // Remove duplicates and sort
-    const uniqueGroups = [...new Set(validGroups)].sort((a, b) => Number.parseInt(a) - Number.parseInt(b))
-
-    return uniqueGroups.join(", ")
+      .filter((g): g is string => g !== null)
+    const unique = [...new Set(valid)].sort((a, b) => Number.parseInt(a) - Number.parseInt(b))
+    return unique.join(", ")
   }
 
-  // validate without mutating (used for inline feedback)
   function invalidYearGroups(value: string): string | null {
     const parts = value.split(",").map((p) => p.trim()).filter(Boolean)
     const bad = parts.filter((p) => !/^\d+$/.test(p) || Number(p) < 7 || Number(p) > 13)
     return bad.length ? `Invalid: ${bad.join(", ")}` : null
   }
 
-  // do NOT format on change; just store raw input
   function handleYearGroupsChange(value: string) {
     setEditForm({ ...editForm, year_groups: value })
   }
@@ -227,12 +201,7 @@ export default function AdminCCAsPage() {
                       <Label htmlFor="name" className="flex items-center gap-2">
                         Name <Lock className="h-4 w-4 text-muted-foreground" />
                       </Label>
-                      <Input
-                        id="name"
-                        value={editForm.name || ""}
-                        disabled={true}
-                        className="bg-muted cursor-not-allowed"
-                      />
+                      <Input id="name" value={editForm.name || ""} disabled className="bg-muted cursor-not-allowed" />
                       <Alert className="mt-2">
                         <Mail className="h-4 w-4" />
                         <AlertDescription>
@@ -365,51 +334,17 @@ export default function AdminCCAsPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p>
-                      <strong>Description:</strong> {cca.description}
-                    </p>
-                    {cca.learning_objectives && (
-                      <p>
-                        <strong>Learning Objectives:</strong> {cca.learning_objectives}
-                      </p>
-                    )}
-                    <p>
-                      <strong>Category:</strong> {cca.category}
-                    </p>
-                    <p>
-                      <strong>Year Groups:</strong> {cca.year_groups}
-                    </p>
-                    <p>
-                      <strong>Selection:</strong> {cca.selection_method}
-                    </p>
-                    <p>
-                      <strong>Staff:</strong> {cca.staff_members}
-                    </p>
-                    {cca.meeting_location && (
-                      <p>
-                        <strong>Meeting Location:</strong> {cca.meeting_location}
-                      </p>
-                    )}
-                    {cca.contact_email && (
-                      <p>
-                        <strong>Contact Email:</strong> {cca.contact_email}
-                      </p>
-                    )}
-                    {cca.image_url && (
-                      <p>
-                        <strong>Image URL:</strong> {cca.image_url}
-                      </p>
-                    )}
-                    {cca.logo_url && (
-                      <p>
-                        <strong>Logo URL:</strong> {cca.logo_url}
-                      </p>
-                    )}
-                    {cca.core_committee_signup_url && (
-                      <p>
-                        <strong>Core Committee Signup:</strong> {cca.core_committee_signup_url}
-                      </p>
-                    )}
+                    <p><strong>Description:</strong> {cca.description}</p>
+                    {cca.learning_objectives && <p><strong>Learning Objectives:</strong> {cca.learning_objectives}</p>}
+                    <p><strong>Category:</strong> {cca.category}</p>
+                    <p><strong>Year Groups:</strong> {cca.year_groups}</p>
+                    <p><strong>Selection:</strong> {cca.selection_method}</p>
+                    <p><strong>Staff:</strong> {cca.staff_members}</p>
+                    {cca.meeting_location && <p><strong>Meeting Location:</strong> {cca.meeting_location}</p>}
+                    {cca.contact_email && <p><strong>Contact Email:</strong> {cca.contact_email}</p>}
+                    {cca.image_url && <p><strong>Image URL:</strong> {cca.image_url}</p>}
+                    {cca.logo_url && <p><strong>Logo URL:</strong> {cca.logo_url}</p>}
+                    {cca.core_committee_signup_url && <p><strong>Core Committee Signup:</strong> {cca.core_committee_signup_url}</p>}
                   </div>
                 )}
               </CardContent>
