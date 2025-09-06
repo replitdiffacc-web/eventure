@@ -1,6 +1,6 @@
 "use client"
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 import { useEffect, useState } from "react"
 import { useAuth } from "@/contexts/auth-context"
@@ -14,7 +14,7 @@ import Navigation from "@/components/navigation"
 import { supabase } from "@/lib/supabase"
 import { Pencil, Save, X, Loader2, Lock, Mail } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner" // ✅ Sonner
 
 interface CCA {
   id: string
@@ -34,7 +34,6 @@ interface CCA {
 
 export default function AdminCCAsPage() {
   const { user } = useAuth()
-  const { toast } = useToast()
   const [ccas, setCcas] = useState<CCA[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<CCA>>({})
@@ -50,20 +49,20 @@ export default function AdminCCAsPage() {
 
   async function fetchCCAs() {
     try {
-      console.log("User role:", user?.role)
-      console.log("User CCA name:", user?.ccaName)
+      console.log("[v0] User role:", user?.role)
+      console.log("[v0] User CCA name:", user?.ccaName)
 
       let query = supabase.from("activities").select("*")
 
       if (user?.role === "cca_head" && user?.ccaName) {
-        console.log("Filtering CCAs for cca_head, looking for name:", user.ccaName)
+        console.log("[v0] Filtering CCAs for cca_head, looking for name:", user.ccaName)
         query = query.eq("name", user.ccaName)
       } else {
-        console.log("Not filtering - user is admin or no cca_name")
+        console.log("[v0] Not filtering - user is admin or no cca_name")
       }
 
       const { data, error } = await query
-      console.log("Fetched CCAs:", data?.length, "CCAs")
+      console.log("[v0] Fetched CCAs:", data?.length, "CCAs")
 
       if (error) {
         console.error("Error fetching CCAs:", error)
@@ -101,10 +100,8 @@ export default function AdminCCAsPage() {
 
       if (!response.ok) {
         console.error("Error updating CCA:", result.error)
-        toast({
-          title: "Save failed",
+        toast("Save failed", {
           description: result.error || "Please try again.",
-          variant: "destructive",
         })
         return
       }
@@ -112,16 +109,13 @@ export default function AdminCCAsPage() {
       setCcas(ccas.map((cca) => (cca.id === id ? { ...cca, ...result.data } : cca)))
       setEditingId(null)
       setEditForm({})
-      toast({
-        title: "Changes saved successfully!",
+      toast("Changes saved successfully!", {
         description: "Your updates have been applied.",
       })
     } catch (error) {
       console.error("Error:", error)
-      toast({
-        title: "Save failed",
+      toast("Save failed", {
         description: "Failed to save changes. Please try again.",
-        variant: "destructive",
       })
     } finally {
       setSaving(false)
