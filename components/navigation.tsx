@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Menu, Calendar, Users, Trophy, Search, Settings, LogIn, LogOut, User, Mail } from "lucide-react"
+import { Menu, Calendar, Users, NotepadText, Search, Settings, LogIn, LogOut, User, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
@@ -41,7 +41,7 @@ export default function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Trophy className="h-5 w-5 text-white" />
+              <NotepadText className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Eventure</span>
           </Link>
