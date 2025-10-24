@@ -1,7 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Supabase is not configured. Connect the database to enable updates." },
+      { status: 503 },
+    )
+  }
+
   try {
     const { id } = params
     const body = await request.json()

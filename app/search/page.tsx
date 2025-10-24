@@ -28,7 +28,7 @@ const allContent = [
     members: 24,
     maxMembers: 30,
     tags: ["basketball", "sports", "team", "competition"],
-    href: "/ccas/1",
+    href: "/ccas/basketball-club",
   },
   {
     id: "cca-2",
@@ -42,7 +42,7 @@ const allContent = [
     members: 18,
     maxMembers: 25,
     tags: ["drama", "theater", "performance", "arts"],
-    href: "/ccas/2",
+    href: "/ccas/drama-club",
   },
   {
     id: "cca-3",
@@ -56,7 +56,7 @@ const allContent = [
     members: 15,
     maxMembers: 20,
     tags: ["robotics", "programming", "engineering", "technology"],
-    href: "/ccas/3",
+    href: "/ccas/robotics-club",
   },
   // Events
   {
@@ -72,7 +72,7 @@ const allContent = [
     capacity: 200,
     rsvpCount: 145,
     tags: ["science", "fair", "projects", "innovation"],
-    href: "/events/1",
+    href: "/events/science-fair-2024",
   },
   {
     id: "event-2",
@@ -87,7 +87,7 @@ const allContent = [
     capacity: 300,
     rsvpCount: 287,
     tags: ["basketball", "championship", "tournament", "sports"],
-    href: "/events/2",
+    href: "/events/basketball-finals",
   },
   {
     id: "event-3",
@@ -102,7 +102,7 @@ const allContent = [
     capacity: 150,
     rsvpCount: 98,
     tags: ["drama", "performance", "theater", "spring"],
-    href: "/events/3",
+    href: "/events/spring-drama-showcase",
   },
   // Committees
   {
@@ -115,7 +115,7 @@ const allContent = [
     applicationDeadline: "2024-04-15",
     members: 4,
     tags: ["leadership", "student council", "governance", "events"],
-    href: "/committees/1",
+    href: "/committees",
   },
   {
     id: "committee-2",
@@ -127,7 +127,7 @@ const allContent = [
     applicationDeadline: "2024-04-10",
     members: 3,
     tags: ["environment", "sustainability", "service", "green"],
-    href: "/committees/3",
+    href: "/committees",
   },
   {
     id: "committee-3",
@@ -139,7 +139,7 @@ const allContent = [
     applicationDeadline: "2024-04-18",
     members: 3,
     tags: ["technology", "digital", "support", "learning"],
-    href: "/committees/6",
+    href: "/committees",
   },
 ]
 

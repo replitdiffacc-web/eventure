@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import Navigation from "@/components/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { CCAsClient } from "@/components/ccas-client"
+import { sampleActivities } from "@/lib/sample-data"
 
 interface CCA {
   id: string
@@ -14,9 +15,19 @@ interface CCA {
   meeting_location: string | null // Added meeting_location field
   image_url: string | null
   is_active: boolean
+  slug?: string
 }
 
 async function getCCAsData() {
+  if (!isSupabaseConfigured) {
+    const active = sampleActivities.filter((cca) => cca.is_active)
+    const uniqueCategories = Array.from(new Set(active.map((c) => c.category)))
+    return {
+      ccas: active,
+      categories: ["All", ...uniqueCategories.sort()],
+    }
+  }
+
   try {
     // Fetch CCAs with meeting_location
     const { data: ccasData, error: ccasError } = await supabase
@@ -37,12 +48,14 @@ async function getCCAsData() {
     const categories = ["All", ...uniqueCategories.sort()]
 
     return {
-      ccas: ccasData || [],
+      ccas: ccasData && ccasData.length > 0 ? ccasData : sampleActivities.filter((cca) => cca.is_active),
       categories,
     }
   } catch (error) {
     console.error("Error fetching data:", error)
-    return { ccas: [], categories: ["All"] }
+    const active = sampleActivities.filter((cca) => cca.is_active)
+    const uniqueCategories = Array.from(new Set(active.map((c) => c.category)))
+    return { ccas: active, categories: ["All", ...uniqueCategories.sort()] }
   }
 }
 

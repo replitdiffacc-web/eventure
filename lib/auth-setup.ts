@@ -1,4 +1,4 @@
-import { supabase } from "./supabase"
+import { supabase, isSupabaseConfigured } from "./supabase"
 
 // Demo user credentials that match the login page
 export const demoUsers = [
@@ -47,6 +47,11 @@ export const demoUsers = [
 // Function to create demo users (for development setup)
 export async function createDemoUsers() {
   console.log("Creating demo users...")
+
+  if (!isSupabaseConfigured) {
+    console.warn("Supabase is not configured. Skipping demo user creation.")
+    return
+  }
 
   for (const user of demoUsers) {
     try {

@@ -3,7 +3,22 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Menu, Calendar, Users, NotepadText, Search, Settings, LogIn, LogOut, User, Mail } from "lucide-react"
+import {
+  Menu,
+  Calendar,
+  Users,
+  UsersRound,
+  BookOpen,
+  HelpCircle,
+  Info,
+  NotepadText,
+  Search,
+  Settings,
+  LogIn,
+  LogOut,
+  User,
+  Mail,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
@@ -20,6 +35,10 @@ const navigationItems = [
   { name: "Home", href: "/", icon: null },
   { name: "CCAs", href: "/ccas", icon: Users },
   { name: "Events", href: "/events", icon: Calendar },
+  { name: "Committees", href: "/committees", icon: UsersRound },
+  { name: "Resources", href: "/resources", icon: BookOpen },
+  { name: "About", href: "/about", icon: Info },
+  { name: "FAQ", href: "/faq", icon: HelpCircle },
   { name: "Search", href: "/search", icon: Search },
   { name: "Contact", href: "/contact", icon: Mail },
 ]

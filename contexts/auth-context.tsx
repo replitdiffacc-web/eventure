@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 interface User {
@@ -37,6 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const initialHandled = useRef(false)
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setIsChecking(false)
+      return
+    }
+
     // Fires once immediately with INITIAL_SESSION, then on changes
     const {
       data: { subscription },
@@ -63,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
+    if (!isSupabaseConfigured) {
+      return
+    }
+
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
@@ -89,6 +98,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    if (!isSupabaseConfigured) {
+      console.warn("Supabase is not configured. Authentication is disabled in demo mode.")
+      return false
+    }
+
     try {
       // Put a hard timeout around the auth call so UI never hangs forever
       const { data, error } = await withTimeout(
@@ -113,6 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async (): Promise<void> => {
+    if (!isSupabaseConfigured) {
+      setUser(null)
+      return
+    }
+
     await supabase.auth.signOut()
     setUser(null)
   }
