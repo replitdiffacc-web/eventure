@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Navigation from "@/components/navigation"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import { sampleEvents } from "@/lib/sample-data"
 
 interface Event {
   id: string
@@ -53,6 +54,15 @@ export default function EventsPage() {
   useEffect(() => {
     async function fetchEvents() {
       try {
+        if (!isSupabaseConfigured) {
+          setEvents(sampleEvents)
+          const uniqueCategories = Array.from(
+            new Set(sampleEvents.map((event) => event.activities?.category).filter(Boolean) as string[]),
+          )
+          setCategories(["All", ...uniqueCategories.sort()])
+          return
+        }
+
         const { data: eventsData, error } = await supabase
           .from("events")
           .select(`
@@ -64,18 +74,32 @@ export default function EventsPage() {
 
         if (error) {
           console.error("Error fetching events:", error)
+          setEvents(sampleEvents)
+          const uniqueCategories = Array.from(
+            new Set(sampleEvents.map((event) => event.activities?.category).filter(Boolean) as string[]),
+          )
+          setCategories(["All", ...uniqueCategories.sort()])
           return
         }
 
-        setEvents(eventsData || [])
+        setEvents(eventsData && eventsData.length > 0 ? eventsData : sampleEvents)
 
         // Extract unique categories
         const uniqueCategories = Array.from(
-          new Set(eventsData?.map((e) => e.activities?.category).filter(Boolean) || []),
+          new Set(
+            (eventsData && eventsData.length > 0 ? eventsData : sampleEvents)
+              .map((e) => e.activities?.category)
+              .filter(Boolean) || [],
+          ),
         )
         setCategories(["All", ...uniqueCategories.sort()])
       } catch (error) {
         console.error("Error fetching events:", error)
+        setEvents(sampleEvents)
+        const uniqueCategories = Array.from(
+          new Set(sampleEvents.map((event) => event.activities?.category).filter(Boolean) as string[]),
+        )
+        setCategories(["All", ...uniqueCategories.sort()])
       } finally {
         setLoading(false)
       }

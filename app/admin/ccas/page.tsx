@@ -11,10 +11,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Navigation from "@/components/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { Pencil, Save, X, Loader2, Lock, Mail } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "sonner"
+import { sampleActivities } from "@/lib/sample-data"
+import { Badge } from "@/components/ui/badge"
 
 interface CCA {
   id: string
@@ -34,6 +36,7 @@ interface CCA {
 
 export default function AdminCCAsPage() {
   const { user } = useAuth()
+  const backendReady = isSupabaseConfigured
   const [ccas, setCcas] = useState<CCA[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<CCA>>({})
@@ -42,11 +45,22 @@ export default function AdminCCAsPage() {
 
   useEffect(() => {
     if (user?.role !== "admin" && user?.role !== "cca_head") return
+
+    if (!backendReady) {
+      setCcas(sampleActivities)
+      setLoading(false)
+      return
+    }
+
     fetchCCAs()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, backendReady])
 
   async function fetchCCAs() {
+    if (!backendReady) {
+      return
+    }
+
     try {
       let query = supabase.from("activities").select("*")
       if (user?.role === "cca_head" && user?.ccaName) {
@@ -66,6 +80,11 @@ export default function AdminCCAsPage() {
   }
 
   async function updateCCA(id: string, updates: Partial<CCA>) {
+    if (!backendReady) {
+      toast.info("Connect Supabase to enable editing.")
+      return
+    }
+
     setSaving(true)
     try {
       const payload: Partial<CCA> = {
@@ -109,6 +128,7 @@ export default function AdminCCAsPage() {
   }
 
   function startEditing(cca: CCA) {
+    if (!backendReady) return
     setEditingId(cca.id)
     setEditForm(cca)
   }
@@ -168,6 +188,14 @@ export default function AdminCCAsPage() {
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
+        {!backendReady && (
+          <Alert className="mb-6" variant="default">
+            <AlertDescription>
+              Eventure is running in demo mode. Connect Supabase to unlock live editing for your CCAs.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <h1 className="text-3xl font-bold mb-8">
           {user.role === "admin" ? "Manage All CCAs" : `Manage ${user.ccaName}`}
         </h1>
@@ -178,19 +206,25 @@ export default function AdminCCAsPage() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>{cca.name}</CardTitle>
-                  {editingId === cca.id ? (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => updateCCA(cca.id, editForm)} disabled={saving}>
-                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {backendReady ? (
+                    editingId === cca.id ? (
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => updateCCA(cca.id, editForm)} disabled={saving}>
+                          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={cancelEditing} disabled={saving}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button size="sm" variant="outline" onClick={() => startEditing(cca)}>
+                        <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEditing} disabled={saving}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    )
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => startEditing(cca)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <Badge variant="outline" className="uppercase tracking-wide text-xs text-muted-foreground">
+                      Read only
+                    </Badge>
                   )}
                 </div>
               </CardHeader>

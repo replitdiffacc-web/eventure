@@ -4,7 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Navigation from "@/components/navigation"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import {
+  sampleAnnouncements,
+  sampleActivities,
+  sampleEvents,
+  sampleTestimonials,
+  sampleCommittees,
+} from "@/lib/sample-data"
 
 // Mock data for upcoming events and announcements
 interface Event {
@@ -41,6 +48,19 @@ interface Activity {
 }
 
 async function getHomePageData() {
+  const fallbackData = {
+    events: sampleEvents.slice(0, 3),
+    announcements: sampleAnnouncements.slice(0, 3),
+    stats: {
+      activities: sampleActivities.length,
+      upcomingEvents: sampleEvents.filter((event) => event.status === "upcoming").length,
+    },
+  }
+
+  if (!isSupabaseConfigured) {
+    return fallbackData
+  }
+
   try {
     // Fetch upcoming events (next 3 events)
     const { data: events } = await supabase
@@ -76,21 +96,21 @@ async function getHomePageData() {
       .select("*", { count: "exact", head: true })
       .gte("event_date", new Date().toISOString().split("T")[0])
 
+    const resolvedEvents = events && events.length > 0 ? events : fallbackData.events
+    const resolvedAnnouncements =
+      announcements && announcements.length > 0 ? announcements : fallbackData.announcements
+
     return {
-      events: events || [],
-      announcements: announcements || [],
+      events: resolvedEvents,
+      announcements: resolvedAnnouncements,
       stats: {
-        activities: activityCount || 0,
-        upcomingEvents: upcomingEventsCount || 0,
+        activities: activityCount ?? fallbackData.stats.activities,
+        upcomingEvents: upcomingEventsCount ?? fallbackData.stats.upcomingEvents,
       },
     }
   } catch (error) {
     console.error("Error fetching home page data:", error)
-    return {
-      events: [],
-      announcements: [],
-      stats: { activities: 0, upcomingEvents: 0 },
-    }
+    return fallbackData
   }
 }
 
@@ -253,8 +273,110 @@ export default async function HomePage() {
               )}
             </div>
           </div>
-        </div>
       </div>
+    </div>
+
+      {/* Committees Preview */}
+      <section className="py-16 bg-slate-50 dark:bg-slate-950 border-t">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Lead with purpose</h2>
+              <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl">
+                Explore student leadership committees that make campus life thrive. Each committee offers unique
+                opportunities to shape initiatives, run events, and represent your peers.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="bg-white dark:bg-slate-900">
+              <Link href="/committees">View all committees</Link>
+            </Button>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {sampleCommittees.slice(0, 3).map((committee) => (
+              <Card key={committee.id} className="h-full border-blue-100 dark:border-slate-800">
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit uppercase tracking-wide text-xs">
+                    {committee.focus}
+                  </Badge>
+                  <CardTitle className="mt-3 text-xl">{committee.name}</CardTitle>
+                  <CardDescription>{committee.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm text-muted-foreground">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Open roles</span>
+                      <p>{committee.openPositions}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Cadence</span>
+                      <p>{committee.meetingCadence}</p>
+                    </div>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1">
+                    {committee.highlights.map((highlight) => (
+                      <li key={highlight}>{highlight}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-16 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Voices from our community</h2>
+            <p className="text-gray-600 dark:text-gray-300 mt-3">
+              Students, educators, and activity leaders share how Eventure streamlines collaboration and keeps
+              everyone informed.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {sampleTestimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">{testimonial.name}</CardTitle>
+                  <CardDescription className="capitalize">{testimonial.role}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground leading-relaxed">“{testimonial.quote}”</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Explore CTA */}
+      <section className="py-16 bg-gradient-to-br from-indigo-600 to-blue-500 text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-4">
+              <h2 className="text-3xl font-bold">Ready to explore more?</h2>
+              <p className="text-lg text-blue-100">
+                Learn about the mission behind Eventure, browse help articles, and get answers to common questions so
+                you can make the most of the platform.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3">
+              <Button asChild size="lg" className="bg-white text-blue-600 hover:text-blue-700">
+                <Link href="/about">About Eventure</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Link href="/resources">Resource Library</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Link href="/faq">FAQs</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

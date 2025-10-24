@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import Navigation from "@/components/navigation"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import { sampleActivities } from "@/lib/sample-data"
 
 interface CCA {
   id: string
@@ -23,6 +24,8 @@ interface CCA {
   image_url?: string
   logo_url?: string
   core_committee_signup_url?: string
+  contact_email?: string
+  slug?: string
 }
 
 interface PageProps {
@@ -58,6 +61,22 @@ export default function CCADetailPage({ params }: PageProps) {
   useEffect(() => {
     async function fetchCCA() {
       try {
+        if (!isSupabaseConfigured) {
+          const fallback = sampleActivities.find((activity) => activity.slug === params.slug)
+          if (fallback) {
+            setCca({
+              ...fallback,
+              description: fallback.description,
+              year_groups: fallback.year_groups,
+              staff_members: fallback.staff_members ?? "",
+              category: fallback.category,
+              selection_method: fallback.selection_method ?? "",
+            })
+          }
+          setLoading(false)
+          return
+        }
+
         const namePattern = slugToNamePattern(params.slug)
         const { data, error } = await supabase
           .from("activities")
@@ -66,6 +85,17 @@ export default function CCADetailPage({ params }: PageProps) {
 
         if (error) {
           console.error("Error fetching CCA:", error)
+          const fallback = sampleActivities.find((activity) => activity.slug === params.slug)
+          if (fallback) {
+            setCca({
+              ...fallback,
+              description: fallback.description,
+              year_groups: fallback.year_groups,
+              staff_members: fallback.staff_members ?? "",
+              category: fallback.category,
+              selection_method: fallback.selection_method ?? "",
+            })
+          }
           return
         }
 
@@ -73,9 +103,32 @@ export default function CCADetailPage({ params }: PageProps) {
 
         if (matchingCca) {
           setCca(matchingCca)
+        } else {
+          const fallback = sampleActivities.find((activity) => activity.slug === params.slug)
+          if (fallback) {
+            setCca({
+              ...fallback,
+              description: fallback.description,
+              year_groups: fallback.year_groups,
+              staff_members: fallback.staff_members ?? "",
+              category: fallback.category,
+              selection_method: fallback.selection_method ?? "",
+            })
+          }
         }
       } catch (error) {
         console.error("Error:", error)
+        const fallback = sampleActivities.find((activity) => activity.slug === params.slug)
+        if (fallback) {
+          setCca({
+            ...fallback,
+            description: fallback.description,
+            year_groups: fallback.year_groups,
+            staff_members: fallback.staff_members ?? "",
+            category: fallback.category,
+            selection_method: fallback.selection_method ?? "",
+          })
+        }
       } finally {
         setLoading(false)
       }
