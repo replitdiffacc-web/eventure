@@ -3,8 +3,8 @@ import { supabase, isSupabaseConfigured } from "./supabase"
 // Demo user credentials that match the login page
 export const demoUsers = [
   {
-    email: "admin@school.edu",
-    password: "admin123",
+    email: 'archive-user-1@example.invalid',
+    password: "",
     profile: {
       name: "School Administrator",
       role: "admin",
@@ -13,8 +13,8 @@ export const demoUsers = [
     },
   },
   {
-    email: "abstract@school.edu",
-    password: "abstract123",
+    email: 'archive-user-2@example.invalid',
+    password: "",
     profile: {
       name: "Abstract Club Head",
       role: "cca_head",
@@ -23,8 +23,8 @@ export const demoUsers = [
     },
   },
   {
-    email: "alpha@school.edu",
-    password: "alpha123",
+    email: 'archive-user-3@example.invalid',
+    password: "",
     profile: {
       name: "ALPHA Head",
       role: "cca_head",
@@ -33,8 +33,8 @@ export const demoUsers = [
     },
   },
   {
-    email: "brushup@school.edu",
-    password: "brushup123",
+    email: 'archive-user-4@example.invalid',
+    password: "",
     profile: {
       name: "Brush Up Head",
       role: "cca_head",
@@ -54,6 +54,7 @@ export async function createDemoUsers() {
   }
 
   for (const user of demoUsers) {
+    if (!user.password) { console.warn("Historical demo account provisioning disabled in portable archive"); return }
     try {
       // Sign up the user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
